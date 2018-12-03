@@ -1,0 +1,13 @@
+[package]
+name = "pmdr"
+version = "0.1.0"
+authors = ["colin <colin@coolmedium.games>"]
+
+[dependencies]
+gtk = "0.5"
+chrono = "0.4"
+notify-rust = "3.5"
+
+[dependencies.gio]
+version = "0.5"
+features = ["v2_42"]
