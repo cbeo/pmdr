@@ -96,6 +96,8 @@ fn build_ui(app: &gtk::Application,
                     .show()
                     .unwrap()
             } else {
+                // pause until the user clicks play.
+                pomodoro.borrow_mut().toggle_timer();
                 Notification::new()
                     .summary("HEY, GET BACK TO WORK!")
                     .timeout(0)
