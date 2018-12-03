@@ -152,13 +152,14 @@ impl TimerState for WorkTimer {
         let timer = self.timer - 1;
 
         let new_state: Box<dyn TimerState> = if timer <= 0 {
+            let count = count + 1;
             let timer = if count % 4 == 0 {
                 LONG_BREAK_MIN * SECS_PER_MINUTE
             } else {
                 SHORT_BFREAK_MIN * SECS_PER_MINUTE
             };
 
-            BreakTimer::new(count+1,timer)
+            BreakTimer::new(count,timer)
         } else {
             WorkTimer::new(count, timer)
         };
