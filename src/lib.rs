@@ -4,8 +4,12 @@ const SECS_PER_HOUR: u32 = 3600;
 
 // these config variables are const right now, but should move into a struct
 const DEFAULT_WORK_MIN: u32 = 25;
-const SHORT_BFREAK_MIN: u32 = 5;
+const SHORT_BREAK_MIN: u32 = 5;
 const LONG_BREAK_MIN: u32 = 15;
+
+const DEFAULT_WORK_SECS: u32 = DEFAULT_WORK_MIN * SECS_PER_MINUTE;
+const SHORT_BREAK_SECS: u32 = SHORT_BREAK_MIN * SECS_PER_MINUTE;
+const LONG_BREAK_SECS: u32 = LONG_BREAK_MIN * SECS_PER_MINUTE;
 
 /// Formats seconds as HH:MM:SS
 ///
@@ -77,7 +81,7 @@ impl TimerState for Stopped {
     }
 
     fn timer(&self) -> u32 {
-        DEFAULT_WORK_MIN * SECS_PER_MINUTE
+        DEFAULT_WORK_SECS
     }
 
     fn ticking(&self) -> bool {
@@ -154,9 +158,9 @@ impl TimerState for WorkTimer {
         let new_state: Box<dyn TimerState> = if timer <= 0 {
             let count = count + 1;
             let timer = if count % 4 == 0 {
-                LONG_BREAK_MIN * SECS_PER_MINUTE
+                LONG_BREAK_SECS
             } else {
-                SHORT_BFREAK_MIN * SECS_PER_MINUTE
+                SHORT_BREAK_SECS
             };
 
             BreakTimer::new(count,timer)
@@ -194,7 +198,7 @@ impl TimerState for BreakTimer {
         let timer = self.timer - 1;
 
         let new_state: Box<dyn TimerState> = if timer <= 0 {
-            WorkTimer::new(count, DEFAULT_WORK_MIN * SECS_PER_MINUTE)
+            WorkTimer::new(count, DEFAULT_WORK_SECS)
         } else {
             BreakTimer::new(count,timer)
         };
@@ -209,7 +213,7 @@ pub struct PMDRApp {
 
 impl PMDRApp {
     pub fn new() -> PMDRApp {
-        let timer_state: Box<dyn TimerState> = WorkTimer::new(0, DEFAULT_WORK_MIN * SECS_PER_MINUTE);
+        let timer_state: Box<dyn TimerState> = WorkTimer::new(0, DEFAULT_WORK_SECS);
         let timer_state = Some(timer_state);
 
         PMDRApp {

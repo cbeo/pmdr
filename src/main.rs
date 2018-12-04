@@ -18,7 +18,8 @@ use std::cell::RefCell;
 
 fn build_ui(app: &gtk::Application,
             pomodoro: Rc<RefCell<pmdr::PMDRApp>>,
-            notification: Rc<RefCell<Option<NotificationHandle>>>)
+            notification: Rc<RefCell<NotificationHandle>>)
+//            notification: Rc<RefCell<Option<NotificationHandle>>>)
 {
     let win = gtk::ApplicationWindow::new(app);
 
@@ -88,31 +89,20 @@ fn build_ui(app: &gtk::Application,
 
         if state_changed {
             let on_break = pomodoro.borrow().on_break();
-            let handle  = if on_break {
-                // TODO handle error case
-                 Notification::new()
-                    .summary("TIME FOR A BREAK!")
-                    .timeout(0)
-                    .show()
-                    .unwrap()
+            if on_break {
+                notification.borrow_mut().summary("TIME FOR A BREAK").timeout(10);
             } else {
                 // pause until the user clicks play.
                 pomodoro.borrow_mut().toggle_timer();
-                Notification::new()
-                    .summary("HEY, GET BACK TO WORK!")
-                    .timeout(0)
-                    .show()
-                    .unwrap()
-            };
+                notification.borrow_mut().summary("HEY, GET BACK TO WORK!").timeout(0);
+            }
 
-            notification.replace(Some(handle));
+            notification.borrow_mut().update();
         }
-
         gtk::Continue(true)
     };
 
     gtk::timeout_add_seconds(1, tick);
-
 }
 
 
@@ -123,7 +113,13 @@ fn main() {
 
     app.connect_startup( move |app0| {
         let pomodoro = Rc::new(RefCell::new(pmdr::PMDRApp::new()));
-        let notification = Rc::new(RefCell::new(None));
+        let notification = Notification::new()
+            .summary("Get to it!")
+            .timeout(10)
+            .show()
+            .unwrap();
+        let notification = Rc::new(RefCell::new(notification));
+
         build_ui(app0, pomodoro, notification);
     });
 
