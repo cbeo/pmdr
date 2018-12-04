@@ -16,10 +16,11 @@ use gtk::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
 
+const NOTIFICATION_SOUND: &'static str = "complete";
+
 fn build_ui(app: &gtk::Application,
             pomodoro: Rc<RefCell<pmdr::PMDRApp>>,
             notification: Rc<RefCell<NotificationHandle>>)
-//            notification: Rc<RefCell<Option<NotificationHandle>>>)
 {
     let win = gtk::ApplicationWindow::new(app);
 
@@ -116,7 +117,7 @@ fn main() {
         let notification = Notification::new()
             .summary("Get to it!")
             .timeout(10)
-            .sound_name("message-new-instant")
+            .sound_name(NOTIFICATION_SOUND)
             .show()
             .unwrap();
         let notification = Rc::new(RefCell::new(notification));
