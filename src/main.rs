@@ -116,6 +116,7 @@ fn main() {
         let notification = Notification::new()
             .summary("Get to it!")
             .timeout(10)
+            .sound_name("message-new-instant")
             .show()
             .unwrap();
         let notification = Rc::new(RefCell::new(notification));
