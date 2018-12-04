@@ -27,7 +27,7 @@ fn build_ui(app: &gtk::Application,
     win.set_title("PMDR");
     win.set_border_width(10);
     win.set_position(gtk::WindowPosition::Mouse);
-    win.set_default_size(240,310);
+    win.set_default_size(200,180);
 
     win.connect_delete_event(move |w,_| {
         w.destroy();
