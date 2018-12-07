@@ -1,7 +1,7 @@
 
 //! # PMDR
 //!
-//! A GTK+ Pomodoro application with "snazzy" reporting
+//! A GTK+ Pomodoro application with notifications
 
 extern crate pmdr;
 extern crate gio;
@@ -54,6 +54,10 @@ fn build_ui(app: &gtk::Application,
     let button_pomodoro = pomodoro.clone();
 
     pause_button.connect_clicked(move |_btn| {
+        let on_break = button_pomodoro.borrow().on_break();
+        if on_break {
+            button_pomodoro.borrow_mut().stop();
+        }
         button_pomodoro.borrow_mut().toggle_timer();
     });
 
@@ -74,10 +78,15 @@ fn build_ui(app: &gtk::Application,
 
     let tick = move || {
         let state_changed = pomodoro.borrow_mut().tick();
+        let on_break = pomodoro.borrow().on_break();
 
         // set button labels
         if pomodoro.borrow().ticking() {
-            pause_button.set_label("Pause");
+            if on_break {
+                pause_button.set_label("Skip");
+            } else {
+                pause_button.set_label("Pause");
+            }
             stop_button.set_label("Stop");
         } else {
             pause_button.set_label("Play");
@@ -89,7 +98,6 @@ fn build_ui(app: &gtk::Application,
         tally_label.set_text(&format!("Tally: {}", pomodoro.borrow().tally()));
 
         if state_changed {
-            let on_break = pomodoro.borrow().on_break();
             if on_break {
                 notification.borrow_mut().summary("TIME FOR A BREAK").timeout(10);
             } else {
