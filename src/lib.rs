@@ -1,4 +1,3 @@
-
 const SECS_PER_MINUTE: u32 = 60;
 const SECS_PER_HOUR: u32 = 3600;
 
@@ -27,26 +26,28 @@ pub fn format_secs(secs: u32) -> String {
     format!("{}:{:02}:{:02}", hours, minutes, seconds)
 }
 
-struct WorkTimer {count: usize, timer: u32}
+struct WorkTimer {
+    count: usize,
+    timer: u32,
+}
 struct Paused(Box<TimerState>);
-struct BreakTimer {count: usize, timer: u32}
-struct Stopped {count: usize}
+struct BreakTimer {
+    count: usize,
+    timer: u32,
+}
+struct Stopped {
+    count: usize,
+}
 
 impl WorkTimer {
     fn new(count: usize, timer: u32) -> Box<WorkTimer> {
-        Box::new(WorkTimer {
-            count,
-            timer
-        })
+        Box::new(WorkTimer { count, timer })
     }
 }
 
 impl BreakTimer {
     fn new(count: usize, timer: u32) -> Box<BreakTimer> {
-        Box::new(BreakTimer {
-            count,
-            timer
-        })
+        Box::new(BreakTimer { count, timer })
     }
 }
 
@@ -70,7 +71,9 @@ trait TimerState {
     fn tick(self: Box<Self>) -> (Box<dyn TimerState>, bool);
 
     fn stop(self: Box<Self>) -> Box<dyn TimerState> {
-        let stopped = Stopped {count: self.count()};
+        let stopped = Stopped {
+            count: self.count(),
+        };
         Box::new(stopped)
     }
 }
@@ -103,7 +106,7 @@ impl TimerState for Stopped {
     // if stop is called on Stopped, we reset the tally.
     // this is kind of hacky
     fn stop(self: Box<Self>) -> Box<dyn TimerState> {
-        Box::new(Stopped {count: 0})
+        Box::new(Stopped { count: 0 })
     }
 }
 
@@ -163,7 +166,7 @@ impl TimerState for WorkTimer {
                 SHORT_BREAK_SECS
             };
 
-            BreakTimer::new(count,timer)
+            BreakTimer::new(count, timer)
         } else {
             WorkTimer::new(count, timer)
         };
@@ -200,7 +203,7 @@ impl TimerState for BreakTimer {
         let new_state: Box<dyn TimerState> = if timer <= 0 {
             WorkTimer::new(count, DEFAULT_WORK_SECS)
         } else {
-            BreakTimer::new(count,timer)
+            BreakTimer::new(count, timer)
         };
 
         (new_state, timer <= 0)
@@ -208,7 +211,7 @@ impl TimerState for BreakTimer {
 }
 
 pub struct PMDRApp {
-    timer_state: Option<Box<TimerState>>
+    timer_state: Option<Box<TimerState>>,
 }
 
 impl PMDRApp {
@@ -216,9 +219,7 @@ impl PMDRApp {
         let timer_state: Box<dyn TimerState> = WorkTimer::new(0, DEFAULT_WORK_SECS);
         let timer_state = Some(timer_state);
 
-        PMDRApp {
-            timer_state
-        }
+        PMDRApp { timer_state }
     }
 
     /// Updates the timer and returns a boolean if the state changed
@@ -232,9 +233,7 @@ impl PMDRApp {
 
     /// Gets the formatted string of the time remaining
     pub fn countdown_string(&self) -> String {
-        let secs = self.timer_state
-            .as_ref()
-            .map_or(0, |state| state.timer());
+        let secs = self.timer_state.as_ref().map_or(0, |state| state.timer());
 
         format_secs(secs)
     }
@@ -249,9 +248,7 @@ impl PMDRApp {
 
     /// Gets the current tally
     pub fn tally(&self) -> usize {
-        self.timer_state
-            .as_ref()
-            .map_or(0, |state| state.count())
+        self.timer_state.as_ref().map_or(0, |state| state.count())
     }
 
     /// Stops the application, but keeps the tally
@@ -279,4 +276,3 @@ impl PMDRApp {
             .map_or(false, |state| state.on_break())
     }
 }
-

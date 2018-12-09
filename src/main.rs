@@ -1,40 +1,39 @@
-
 //! # PMDR
 //!
 //! A GTK+ Pomodoro application with notifications
 
-extern crate pmdr;
 extern crate gio;
 extern crate gtk;
 extern crate notify_rust;
+extern crate pmdr;
 
-use notify_rust::{Notification, NotificationHandle};
 use gio::prelude::*;
 use gtk::prelude::*;
+use notify_rust::{Notification, NotificationHandle};
 
-
-use std::rc::Rc;
 use std::cell::RefCell;
+use std::rc::Rc;
 
 const NOTIFICATION_SOUND: &'static str = "complete";
 
-fn build_ui(app: &gtk::Application,
-            pomodoro: Rc<RefCell<pmdr::PMDRApp>>,
-            notification: Rc<RefCell<NotificationHandle>>)
-{
+fn build_ui(
+    app: &gtk::Application,
+    pomodoro: Rc<RefCell<pmdr::PMDRApp>>,
+    notification: Rc<RefCell<NotificationHandle>>,
+) {
     let win = gtk::ApplicationWindow::new(app);
 
     win.set_title("PMDR");
     win.set_border_width(10);
     win.set_position(gtk::WindowPosition::Mouse);
-    win.set_default_size(200,180);
+    win.set_default_size(200, 180);
 
-    win.connect_delete_event(move |w,_| {
+    win.connect_delete_event(move |w, _| {
         w.destroy();
         Inhibit(false)
     });
 
-    let vbox = gtk::Box::new(gtk::Orientation::Vertical,  8);
+    let vbox = gtk::Box::new(gtk::Orientation::Vertical, 8);
 
     let state_label = gtk::Label::new(None);
     state_label.set_text(&pomodoro.borrow().state_label());
@@ -99,11 +98,17 @@ fn build_ui(app: &gtk::Application,
 
         if state_changed {
             if on_break {
-                notification.borrow_mut().summary("TIME FOR A BREAK").timeout(10);
+                notification
+                    .borrow_mut()
+                    .summary("TIME FOR A BREAK")
+                    .timeout(10);
             } else {
                 // pause until the user clicks play.
                 pomodoro.borrow_mut().toggle_timer();
-                notification.borrow_mut().summary("HEY, GET BACK TO WORK!").timeout(0);
+                notification
+                    .borrow_mut()
+                    .summary("HEY, GET BACK TO WORK!")
+                    .timeout(0);
             }
 
             notification.borrow_mut().update();
@@ -114,13 +119,11 @@ fn build_ui(app: &gtk::Application,
     gtk::timeout_add_seconds(1, tick);
 }
 
-
 fn main() {
-
     let app = gtk::Application::new("games.coolmedium.pmdr", gio::ApplicationFlags::empty())
         .expect("Failed to initialize GTK Application");
 
-    app.connect_startup( move |app0| {
+    app.connect_startup(move |app0| {
         let pomodoro = Rc::new(RefCell::new(pmdr::PMDRApp::new()));
         let notification = Notification::new()
             .summary("Get to it!")
