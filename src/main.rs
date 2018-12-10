@@ -14,7 +14,7 @@ use notify_rust::{Notification, NotificationHandle};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const NOTIFICATION_SOUND: & str = "complete";
+const NOTIFICATION_SOUND: &str = "complete";
 
 fn build_ui(
     app: &gtk::Application,
