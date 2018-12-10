@@ -40,13 +40,13 @@ struct Stopped {
 }
 
 impl WorkTimer {
-    fn new(count: usize, timer: u32) -> Box<WorkTimer> {
+    fn boxed(count: usize, timer: u32) -> Box<WorkTimer> {
         Box::new(WorkTimer { count, timer })
     }
 }
 
 impl BreakTimer {
-    fn new(count: usize, timer: u32) -> Box<BreakTimer> {
+    fn boxed(count: usize, timer: u32) -> Box<BreakTimer> {
         Box::new(BreakTimer { count, timer })
     }
 }
@@ -92,11 +92,11 @@ impl TimerState for Stopped {
     }
 
     fn label(&self) -> String {
-        format!("Stopped")
+        "Stopped".to_string()
     }
 
     fn toggle(self: Box<Self>) -> Box<dyn TimerState> {
-        WorkTimer::new(self.count(), self.timer())
+        WorkTimer::boxed(self.count(), self.timer())
     }
 
     fn tick(self: Box<Self>) -> (Box<dyn TimerState>, bool) {
@@ -147,7 +147,7 @@ impl TimerState for WorkTimer {
     }
 
     fn label(&self) -> String {
-        format!("Keep Going!")
+        "Keep Going!".to_string()
     }
 
     fn toggle(self: Box<Self>) -> Box<dyn TimerState> {
@@ -158,7 +158,7 @@ impl TimerState for WorkTimer {
         let count = self.count;
         let timer = self.timer - 1;
 
-        let new_state: Box<dyn TimerState> = if timer <= 0 {
+        let new_state: Box<dyn TimerState> = if timer == 0 {
             let count = count + 1;
             let timer = if count % 4 == 0 {
                 LONG_BREAK_SECS
@@ -166,12 +166,12 @@ impl TimerState for WorkTimer {
                 SHORT_BREAK_SECS
             };
 
-            BreakTimer::new(count, timer)
+            BreakTimer::boxed(count, timer)
         } else {
-            WorkTimer::new(count, timer)
+            WorkTimer::boxed(count, timer)
         };
 
-        (new_state, timer <= 0)
+        (new_state, timer == 0)
     }
 }
 
@@ -185,7 +185,7 @@ impl TimerState for BreakTimer {
     }
 
     fn label(&self) -> String {
-        format!("On Break")
+        "On Break".to_string()
     }
 
     fn on_break(&self) -> bool {
@@ -200,13 +200,13 @@ impl TimerState for BreakTimer {
         let count = self.count;
         let timer = self.timer - 1;
 
-        let new_state: Box<dyn TimerState> = if timer <= 0 {
-            WorkTimer::new(count, DEFAULT_WORK_SECS)
+        let new_state: Box<dyn TimerState> = if timer == 0 {
+            WorkTimer::boxed(count, DEFAULT_WORK_SECS)
         } else {
-            BreakTimer::new(count, timer)
+            BreakTimer::boxed(count, timer)
         };
 
-        (new_state, timer <= 0)
+        (new_state, timer == 0)
     }
 }
 
@@ -216,7 +216,7 @@ pub struct PMDRApp {
 
 impl PMDRApp {
     pub fn new() -> PMDRApp {
-        let timer_state: Box<dyn TimerState> = WorkTimer::new(0, DEFAULT_WORK_SECS);
+        let timer_state: Box<dyn TimerState> = WorkTimer::boxed(0, DEFAULT_WORK_SECS);
         let timer_state = Some(timer_state);
 
         PMDRApp { timer_state }
