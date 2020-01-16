@@ -30,7 +30,7 @@ struct WorkTimer {
     count: usize,
     timer: u32,
 }
-struct Paused(Box<TimerState>);
+struct Paused(Box<dyn TimerState>);
 struct BreakTimer {
     count: usize,
     timer: u32,
@@ -211,7 +211,7 @@ impl TimerState for BreakTimer {
 }
 
 pub struct PMDRApp {
-    timer_state: Option<Box<TimerState>>,
+    timer_state: Option<Box<dyn TimerState>>,
 }
 
 impl PMDRApp {
